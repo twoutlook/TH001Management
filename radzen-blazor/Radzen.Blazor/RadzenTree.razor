@@ -1,0 +1,173 @@
+@inherits RadzenComponent
+@using Microsoft.AspNetCore.Components.Rendering;
+@using System.Collections
+@using System.Linq
+
+@if (Visible)
+{
+    <div @ref="@Element" @attributes="Attributes" class="@GetCssClass()" style="@Style" id="@GetId()">
+        <ul class="rz-tree-container">
+        <CascadingValue Value=this>
+            @ChildContent
+        </CascadingValue>
+        @if (Data != null && Levels.Any())
+        {
+            <CascadingValue Value=this>
+                @RenderChildren(Data, 0)
+            </CascadingValue>
+        }
+        </ul>
+    </div>
+}
+
+@code {
+    protected override string GetComponentCssClass()
+    {
+        return "rz-tree";
+    }
+
+    internal RadzenTreeItem SelectedItem { get; private set; }
+
+    IList<RadzenTreeLevel> Levels { get; set; } = new List<RadzenTreeLevel>();
+
+    [Parameter]
+    public EventCallback<TreeEventArgs> Change { get; set; }
+
+    [Parameter]
+    public EventCallback<TreeExpandEventArgs> Expand { get; set; }
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public IEnumerable Data { get; set; }
+
+    [Parameter]
+    public object Value { get; set;}
+
+    [Parameter]
+    public EventCallback<object> ValueChanged { get; set; }
+
+    void RenderTreeItem(RenderTreeBuilder builder, object data, RenderFragment<RadzenTreeItem> template, Func<object, string> text, 
+        Func<object, bool> hasChildren, Func<object, bool> expanded, Func<object, bool> selected)
+    {
+        builder.OpenComponent<RadzenTreeItem>(0);
+        builder.AddAttribute(1, nameof(RadzenTreeItem.Text), text(data));
+        builder.AddAttribute(2, nameof(RadzenTreeItem.Value), data);
+        builder.AddAttribute(3, nameof(RadzenTreeItem.HasChildren), hasChildren(data));
+        builder.AddAttribute(4, nameof(RadzenTreeItem.Template), template);
+        builder.AddAttribute(5, nameof(RadzenTreeItem.Expanded), expanded(data));
+        builder.AddAttribute(6, nameof(RadzenTreeItem.Selected), Value == data || selected(data));
+        builder.SetKey(data);
+    }
+
+    RenderFragment RenderChildren(IEnumerable children, int depth)
+    {
+        var level = depth < Levels.Count() ? Levels.ElementAt(depth) : Levels.Last();
+
+        return new RenderFragment(builder =>
+        {
+            Func<object, string> text = null;
+
+            foreach (var data in children)
+            {
+                if (text == null)
+                {
+                    text = level.Text ?? Getter<string>(data, level.TextProperty);
+                }
+
+                RenderTreeItem(builder, data, level.Template, text, level.HasChildren, level.Expanded, level.Selected);
+
+                var hasChildren = level.HasChildren(data);
+
+                if (!string.IsNullOrEmpty(level.ChildrenProperty))
+                {
+                    var grandChildren = PropertyAccess.GetValue(data, level.ChildrenProperty) as IEnumerable;
+
+                    if (grandChildren != null && hasChildren)
+                    {
+                        builder.AddAttribute(7, "ChildContent", RenderChildren(grandChildren, depth + 1));
+                    }
+                }
+
+                builder.CloseComponent();
+            }
+        });
+    }
+
+    internal async Task SelectItem(RadzenTreeItem item)
+    {
+        var selectedItem = SelectedItem;
+
+        if (selectedItem != item)
+        {
+            SelectedItem = item;
+
+            selectedItem?.Unselect();
+
+            if (Value != item.Value)
+            {
+                await ValueChanged.InvokeAsync(item.Value);
+            }
+
+            await Change.InvokeAsync(new TreeEventArgs()
+            {
+                Text = item?.Text,
+                Value = item?.Value
+            });
+        }
+    }
+
+    internal async Task ExpandItem(RadzenTreeItem item)
+    {
+        var args = new TreeExpandEventArgs()
+        {
+            Text = item?.Text,
+            Value = item?.Value,
+            Children = new TreeItemSettings()
+        };
+
+        await Expand.InvokeAsync(args);
+
+        if (args.Children.Data != null)
+        {
+            var childContent = new RenderFragment(builder =>
+            {
+                Func<object, string> text = null;
+                var children = args.Children;
+
+                foreach (var data in children.Data)
+                {
+                    if (text == null)
+                    {
+                        text = children.Text ?? Getter<string>(data, children.TextProperty);
+                    }
+
+                    RenderTreeItem(builder, data, children.Template, text, children.HasChildren, children.Expanded, children.Selected);
+                    builder.CloseComponent();
+                }
+            });
+
+            item.RenderChildContent(childContent);
+        }
+    }
+
+    Func<object, T> Getter<T>(object data, string property)
+    {
+        if (string.IsNullOrEmpty(property))
+        {
+            return (value) => (T)value;
+        }
+
+        return PropertyAccess.Getter<T>(data, property);
+    }
+
+    internal void AddLevel(RadzenTreeLevel level)
+    {
+        if (!Levels.Contains(level))
+        {
+            Levels.Add(level);
+            StateHasChanged();
+        }
+    }
+}
