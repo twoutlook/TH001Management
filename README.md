@@ -6,8 +6,11 @@
       -  'ExampleService' could not be found 
       -  'ThemeState' could not be found
       -  'Radzen' could not be found 
+        - solved by NuGet Radzen.Blazor 3.1.6
       -  'RadzenSidebar' could not be found 
+        - solved by NuGet Radzen.Blazor 3.1.6
       -  'RadzenBody' could not be found
+        - solved by NuGet Radzen.Blazor 3.1.6
       -  'Example' could not be found
 
 
