@@ -8,7 +8,7 @@
      
   - 可以自主收起的機制, simply copy MainLayout.razor, to have 3 errors to solve 
     -  'ExampleService' could not be found 
-      - Startup.ConfigureServices   services.AddScoped<ExampleService>();
+        - Startup.ConfigureServices   services.AddScoped<ExampleService>();
     -  'ThemeState' could not be found
     -  'Example' could not be found
 
