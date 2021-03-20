@@ -1,6 +1,7 @@
 # TH001Management
 ## Radzen 
 - Nav
+  - 可以自主收起的機制  
 - Auth
 - Tabs
 - Grid
