@@ -1,17 +1,15 @@
 # TH001Management
 ## Radzen 
 - Nav
+  - new App1, with NuGet Radzen.Blazor 3.1.6, to prevent
+    -  'Radzen' could not be found 
+    -  'RadzenSidebar' could not be found 
+    -  'RadzenBody' could not be found 
+     
   - 可以自主收起的機制  
-    - simply copy MainLayout.razor
+    - simply copy MainLayout.razor, to have 3 errors to solve
       -  'ExampleService' could not be found 
       -  'ThemeState' could not be found
-      -  'Radzen' could not be found 
-         - solved by NuGet Radzen.Blazor 3.1.6
-        
-      -  'RadzenSidebar' could not be found  - solved by NuGet Radzen.Blazor 3.1.6
-         - solved by NuGet Radzen.Blazor 3.1.6
-      -  'RadzenBody' could not be found
-         - solved by NuGet Radzen.Blazor 3.1.6- solved by NuGet Radzen.Blazor 3.1.6
       -  'Example' could not be found
 
 
