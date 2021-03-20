@@ -6,11 +6,10 @@
     -  'RadzenSidebar' could not be found 
     -  'RadzenBody' could not be found 
      
-  - 可以自主收起的機制  
-    - simply copy MainLayout.razor, to have 3 errors to solve
-      -  'ExampleService' could not be found 
-      -  'ThemeState' could not be found
-      -  'Example' could not be found
+  - 可以自主收起的機制, simply copy MainLayout.razor, to have 3 errors to solve 
+    -  'ExampleService' could not be found 
+    -  'ThemeState' could not be found
+    -  'Example' could not be found
 
 
 
